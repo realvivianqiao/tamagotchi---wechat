@@ -1,7 +1,7 @@
 // The five pets, in Chinese. Species keys match the Mac/Windows apps and the server.
 const PETS = {
   dog: { kind: '小狗', name: '虎虎', trait: '摇尾巴摇到停不下来' },
-  bird: { kind: '玄凤鹦鹉', name: '啾啾', trait: '偷吃完还要唱首歌' },
+  bird: { kind: '鹦鹉', name: '啾啾', trait: '偷吃完还要唱首歌' },
   octopus: { kind: '小章鱼', name: '葡萄', trait: '小机灵鬼，什么都想管' },
   cat: { kind: '小猫', name: '花花', trait: '嘴上嫌弃，心里很粘人' },
   frog: { kind: '小青蛙', name: '皮皮', trait: '看见苍蝇能开心一整天' },
