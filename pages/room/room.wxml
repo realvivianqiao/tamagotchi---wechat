@@ -1,0 +1,133 @@
+<view class="page">
+  <view wx:if="{{!connected}}" class="connecting">正在连接…</view>
+
+  <!-- the family member you're looking at -->
+  <view wx:if="{{friend}}" class="card friend" bindtap="onFriendTap" aria-role="button" aria-label="设置{{friend.partnerName}}在哪个城市">
+    <view class="avatar"><image class="avatar-img px" src="{{friend.avatar}}" mode="aspectFit" /></view>
+    <view class="friend-text">
+      <text class="friend-name">{{friend.partnerName}}</text>
+      <text class="friend-time">{{friend.timeLine}}</text>
+    </view>
+    <text class="pill {{friend.pillClass}}">{{friend.pill}}</text>
+  </view>
+  <view wx:else class="card empty" bindtap="openAdd" aria-role="button">
+    <text class="empty-title">还没有家人</text>
+    <text class="empty-sub">点这里，把邀请发到家庭群</text>
+  </view>
+
+  <!-- your pet's room -->
+  <view class="stage">
+    <view class="floor"></view>
+    <view class="pet-wrap {{petClass}}" bindtap="onPetTap" aria-role="button" aria-label="摸摸{{me.petName}}">
+      <image class="pet px" src="{{petSrc}}" mode="widthFix" />
+    </view>
+    <view wx:if="{{hearts}}" class="hearts" aria-hidden="true">
+      <image class="heart h1 px" src="/images/heart.png" />
+      <image class="heart h2 px" src="/images/heart.png" />
+      <image class="heart h3 px" src="/images/heart.png" />
+    </view>
+    <view wx:if="{{line}}" class="bubble">{{line}}</view>
+    <text class="pet-label" bindtap="renamePet" aria-role="button" aria-label="给{{me.petName}}改名字">{{me.petName}}</text>
+    <button class="feed-self" bindtap="onFeedSelf" aria-label="喂{{me.petName}}">喂它</button>
+  </view>
+
+  <view class="stats">
+    <view class="stat">
+      <text class="stat-name">饱饱</text>
+      <view class="segs"><view wx:for="{{fullBars}}" wx:key="index" class="seg {{item ? 'full' : ''}}"></view></view>
+    </view>
+    <view class="stat">
+      <text class="stat-name">开心</text>
+      <view class="segs"><view wx:for="{{happyBars}}" wx:key="index" class="seg {{item ? 'happy' : ''}}"></view></view>
+    </view>
+  </view>
+
+  <text class="section">{{friend ? '给' + friend.partnerName + '送点心意' : '加了家人以后，就能互相串门'}}</text>
+  <view class="actions">
+    <button wx:for="{{actions}}" wx:key="action" class="btn act" style="background: {{friend ? item.tint : '#EFE4D2'}}" data-action="{{item.action}}" bindtap="onAction">
+      <image class="act-icon" src="/images/icons/{{item.action}}.svg" />
+      <text>{{item.label}}</text>
+    </button>
+  </view>
+
+  <view class="family">
+    <text class="family-label">家人</text>
+    <scroll-view scroll-x enable-flex class="family-scroll">
+      <view class="family-row">
+        <view wx:for="{{friends}}" wx:key="code" class="chip-friend {{item.code === activeCode ? 'on' : ''}}" data-code="{{item.code}}" bindtap="onChip" aria-role="button">
+          <view class="chip-av"><image class="chip-img px" src="/images/pets/{{item.species}}_sit.png" mode="aspectFit" /></view>
+          <text>{{item.partnerName}}</text>
+          <view wx:if="{{item.online}}" class="dot"></view>
+        </view>
+        <view class="chip-add" bindtap="openAdd" aria-role="button">+ 加家人</view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- after sending -->
+<view wx:if="{{sheet}}" class="mask" bindtap="closeSheet">
+  <view class="sheet" catchtap="noop" aria-role="dialog">
+    <view class="handle"></view>
+    <view class="scene {{sheet.night ? 'night' : ''}}">
+      <view class="scene-floor"></view>
+      <text wx:if="{{sheet.place}}" class="scene-tag">{{sheet.place}}</text>
+      <text wx:if="{{sheet.night}}" class="zzz" aria-hidden="true">Z z z</text>
+      <image class="scene-pet px" src="{{sheet.petSrc}}" mode="widthFix" />
+    </view>
+    <text class="sheet-title">{{sheet.title}}</text>
+    <text class="sheet-body">{{sheet.body}}</text>
+    <view class="card log">
+      <view wx:for="{{sheet.recent}}" wx:key="id" class="log-row">
+        <view class="log-text">
+          <text class="log-what">{{item.text}}</text>
+          <text class="log-when">{{item.when}}</text>
+        </view>
+        <text class="pill {{item.pillClass}}">{{item.pill}}</text>
+      </view>
+    </view>
+    <button class="btn primary" bindtap="onSubscribe">{{sheet.name}}回应时，微信提醒我</button>
+    <button class="btn ghost" bindtap="closeSheet">好的</button>
+  </view>
+</view>
+
+<!-- a family member's pet comes over -->
+<view wx:if="{{visit}}" class="mask visit-mask">
+  <view class="visit" aria-role="dialog">
+    <view class="banner">
+      <text class="banner-title">{{visit.title}}</text>
+      <text class="banner-sub">{{visit.sub}}</text>
+    </view>
+    <view class="stage visit-stage">
+      <view class="floor"></view>
+      <view class="visitor-wrap"><image class="visitor px" src="{{visit.src}}" mode="widthFix" /></view>
+      <image class="host px" src="{{visit.hostSrc}}" mode="widthFix" />
+      <view wx:if="{{visit.hearts}}" class="hearts visit-hearts" aria-hidden="true">
+        <image class="heart h1 px" src="/images/heart.png" />
+        <image class="heart h2 px" src="/images/heart.png" />
+        <image class="heart h3 px" src="/images/heart.png" />
+      </view>
+      <view class="bubble visit-bubble">{{visit.line}}</view>
+    </view>
+    <button class="btn primary" bindtap="hugBack"><image class="act-icon" src="/images/icons/hug.svg" />抱回去</button>
+    <button class="btn secondary" bindtap="pokeBack">戳回去</button>
+    <button class="btn ghost" bindtap="closeVisit">好的</button>
+  </view>
+</view>
+
+<!-- add family -->
+<view wx:if="{{addOpen}}" class="mask" bindtap="closeAdd">
+  <view class="sheet" catchtap="noop" aria-role="dialog">
+    <view class="handle"></view>
+    <text class="sheet-title">加家人</text>
+    <text class="sheet-body">把邀请发到家庭群，家人点开就能领养一只，自动加上你。</text>
+    <view class="code-box">
+      <text class="code-label">我的邀请码</text>
+      <text class="code">{{shareCodeSpaced || '……'}}</text>
+    </view>
+    <button class="btn primary" open-type="share">发给家人</button>
+    <text class="or">或者，输入家人给你的邀请码</text>
+    <input class="field code" placeholder="6 位邀请码" value="{{codeInput}}" maxlength="6" bindinput="onCodeInput" aria-label="家人的邀请码" />
+    <button class="btn secondary" bindtap="addByCode" loading="{{adding}}">添加</button>
+  </view>
+</view>

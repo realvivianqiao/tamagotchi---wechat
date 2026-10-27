@@ -1,0 +1,67 @@
+<view class="page">
+  <block wx:if="{{step === 'pet'}}">
+    <view class="head">
+      <text class="title">{{inviter ? inviter + '邀请你养一只小宠物' : '选一只陪你的小宠物'}}</text>
+      <text class="sub">它会住在你的手机里，家人的宠物会常来串门。</text>
+    </view>
+
+    <view class="list" aria-role="radiogroup">
+      <view wx:for="{{pets}}" wx:key="species" class="row {{selected === item.species ? 'on' : ''}}" data-species="{{item.species}}" bindtap="onPick" aria-role="radio" aria-checked="{{selected === item.species}}">
+        <view class="thumb">
+          <image class="thumb-img px" src="{{item.src}}" mode="aspectFit" />
+        </view>
+        <view class="row-text">
+          <view class="row-name">{{item.name}}<text class="row-kind">{{item.kind}}</text></view>
+          <text class="row-trait">{{item.trait}}</text>
+        </view>
+        <view class="radio {{selected === item.species ? 'on' : ''}}">
+          <image wx:if="{{selected === item.species}}" class="check" src="/images/icons/check.svg" />
+        </view>
+      </view>
+    </view>
+
+    <view class="foot">
+      <button class="btn primary" disabled="{{!selected}}" bindtap="toName">{{selected ? '就选' + selectedName : '先选一只'}}</button>
+      <text class="hint">名字以后还能改</text>
+      <text wx:if="{{!inviter}}" class="link" bindtap="openHelper">我在电脑上用 Boop，想邀请家人</text>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="head">
+      <text class="title">怎么称呼你？</text>
+      <text class="sub">家人会看到这个名字。</text>
+    </view>
+    <view class="chips">
+      <text wx:for="{{nameChoices}}" wx:key="*this" class="chip {{myName === item ? 'on' : ''}}" data-name="{{item}}" bindtap="onNameChip">{{item}}</text>
+    </view>
+    <input class="field" placeholder="或者自己写" value="{{myName}}" maxlength="12" bindinput="onNameInput" aria-label="你的称呼" />
+
+    <text class="label">给{{selectedKind}}起个名字</text>
+    <view class="name-row">
+      <image class="name-pet px" src="/images/pets/{{selected}}_happy.png" mode="aspectFit" />
+      <input class="field grow" value="{{petName}}" maxlength="8" bindinput="onPetNameInput" aria-label="宠物的名字" />
+    </view>
+
+    <block wx:if="{{!hasInvite}}">
+      <text class="label">家人给了你邀请码？没有就空着</text>
+      <input class="field code" placeholder="6 位邀请码" value="{{codeInput}}" maxlength="6" bindinput="onCodeInput" aria-label="家人的邀请码" />
+    </block>
+
+    <view class="foot">
+      <button class="btn primary" bindtap="finish" loading="{{busy}}">好了</button>
+      <text class="link" bindtap="backToPet">换一只</text>
+    </view>
+  </block>
+</view>
+
+<view wx:if="{{helper}}" class="mask" bindtap="closeHelper">
+  <view class="sheet" catchtap="noop">
+    <view class="handle"></view>
+    <text class="sheet-title">邀请家人</text>
+    <text class="sheet-body">在电脑上的 Boop 菜单里点 “Invite a friend…”，把 6 位邀请码填在这里，再发到家庭群。家人点开就能领养一只，自动加上你。</text>
+    <input class="field code" placeholder="电脑上的邀请码" value="{{deskCode}}" maxlength="6" bindinput="onDeskCode" aria-label="电脑上的邀请码" />
+    <input class="field" placeholder="你的名字，比如 Vivian" value="{{deskName}}" maxlength="12" bindinput="onDeskName" aria-label="你的名字" />
+    <button class="btn primary" open-type="share" data-kind="desktop" disabled="{{!deskReady}}">发到家庭群</button>
+  </view>
+</view>

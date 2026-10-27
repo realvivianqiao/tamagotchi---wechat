@@ -1,0 +1,126 @@
+/* Shared look: Boop's cream room, dark-brown ink, big type for parents (body ≥ 34rpx, buttons 44rpx). */
+page {
+  background: #FFF6E6;
+  color: #3B2414;
+  font-family: "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+  font-size: 34rpx;
+  line-height: 1.5;
+}
+
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 24rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+/* Buttons: WeChat's defaults are fixed-width and grey; every Boop button resets them. */
+button.btn {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  font-weight: 700;
+  color: #3B2414;
+  line-height: 1.2;
+}
+button.btn::after { border: none; }
+button.btn.primary {
+  height: 128rpx;
+  border-radius: 64rpx;
+  background: #FFD45A;
+  border: 5rpx solid #3B2414;
+  font-size: 42rpx;
+}
+button.btn.secondary {
+  height: 112rpx;
+  border-radius: 56rpx;
+  background: #FFFFFF;
+  border: 4rpx solid #3B2414;
+  font-size: 40rpx;
+}
+button.btn.ghost {
+  height: 92rpx;
+  background: transparent;
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #7A5636;
+}
+button.btn[disabled] {
+  background: #EFE4D2 !important;
+  border-color: #CDB79A !important;
+  color: #8C7357 !important;
+}
+
+.title { font-size: 56rpx; font-weight: 900; line-height: 1.25; }
+.sub { font-size: 34rpx; color: #7A5636; }
+.card {
+  background: #FFFFFF;
+  border: 3rpx solid #EBD9BD;
+  border-radius: 40rpx;
+}
+.pill {
+  flex-shrink: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background: #EFE7DA;
+  color: #5E5146;
+}
+.pill.yellow { background: #FFF0C2; color: #3B2414; border: 3rpx solid #E2C477; }
+.pill.green { background: #DDF2DF; color: #1E6A3A; }
+.pill.night { background: #E3E5F5; color: #2F3459; }
+.pill.purple { background: #EEE7FA; color: #6A4A8C; }
+
+.field {
+  height: 104rpx;
+  box-sizing: border-box;
+  padding: 0 28rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 3rpx solid #EBD9BD;
+  font-size: 38rpx;
+}
+.field.code { letter-spacing: 12rpx; font-weight: 700; text-transform: uppercase; }
+.label { font-size: 32rpx; font-weight: 700; }
+.link { align-self: center; font-size: 30rpx; color: #7A5636; text-decoration: underline; padding: 12rpx; }
+
+/* Bottom sheets */
+.mask {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(59, 36, 20, 0.45);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 10;
+}
+.sheet {
+  background: #FFF6E6;
+  border-radius: 56rpx 56rpx 0 0;
+  padding: 20rpx 40rpx calc(40rpx + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  max-height: 92vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.handle { align-self: center; width: 88rpx; height: 10rpx; border-radius: 6rpx; background: #D9C4A3; }
+.sheet-title { font-size: 60rpx; font-weight: 900; }
+.sheet-body { font-size: 36rpx; line-height: 1.55; }
+
+/* Pixel art stays crisp */
+.px { image-rendering: pixelated; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8rpx); } }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-40rpx); } 60% { transform: translateY(0); } 80% { transform: translateY(-12rpx); } }
+@keyframes rise { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-200rpx) scale(1); opacity: 0; } }
+@keyframes walk-in { from { transform: translateX(-420rpx); } to { transform: translateX(0); } }
+@keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 70% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }

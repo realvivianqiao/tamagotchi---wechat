@@ -1,0 +1,30 @@
+{
+  "description": "Boop 小宠物 · WeChat mini program. Replace appid with yours once the mini program is registered.",
+  "appid": "touristappid",
+  "projectname": "boop-wechat",
+  "compileType": "miniprogram",
+  "libVersion": "3.3.4",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "showShadowRootInWxmlPanel": true,
+    "ignoreUploadUnusedFiles": true
+  },
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "scripts" },
+      { "type": "folder", "value": "server-patch" },
+      { "type": "folder", "value": "node_modules" },
+      { "type": "file", "value": "README.md" },
+      { "type": "file", "value": "package.json" },
+      { "type": "file", "value": "package-lock.json" },
+      { "type": "file", "value": ".gitignore" }
+    ],
+    "include": []
+  },
+  "condition": {},
+  "editorSetting": { "tabIndent": "insertSpaces", "tabSize": 2 }
+}
