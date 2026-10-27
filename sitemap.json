@@ -1,0 +1,4 @@
+{
+  "desc": "Pet rooms are private to each family; nothing here is for WeChat search.",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}

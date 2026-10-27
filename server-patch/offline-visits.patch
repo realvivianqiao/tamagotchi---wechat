@@ -1,0 +1,125 @@
+diff --git a/index.js b/index.js
+index c8a1301..a56a745 100644
+--- a/index.js
++++ b/index.js
+@@ -128,6 +128,18 @@ const rooms = new Map();
+ /** @type {Map<string, {hostName:?string, guestName:?string, hostDeviceId:?string, guestDeviceId:?string, fullness:number, happiness:number, createdAt:number, bondedAt:?number}>} */
+ const invites = new Map();
+ 
++/**
++ * Pokes, hugs and snacks sent while the other person is away (a laptop asleep overnight, a phone with
++ * the mini program closed) wait here and play when that person next attaches to the room. In memory:
++ * a restart drops them, which is fine for pokes. code -> [{ id, action, from, species, outfit, at, senderDeviceId }]
++ */
++const pendingActions = new Map();
++/** "It arrived" receipts for senders who were offline when their action finally landed. deviceId -> [msg] */
++const pendingReceipts = new Map();
++const MAX_PENDING_PER_ROOM = 20;
++const MAX_REPLAY_ON_ATTACH = 3;
++const PENDING_TTL_MS = 7 * 24 * 60 * 60 * 1000;
++
+ const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+ function isValidCode(c) {
+   return typeof c === "string" && c.length === 6 && [...c].every((ch) => CODE_ALPHABET.includes(ch));
+@@ -524,6 +536,67 @@ function flushPendingBonds(deviceId, ws) {
+   return delivered;
+ }
+ 
++function queueAction(code, entry) {
++  const now = Date.now();
++  const list = (pendingActions.get(code) || []).filter((e) => now - e.at < PENDING_TTL_MS);
++  list.push(entry);
++  pendingActions.set(code, list.slice(-MAX_PENDING_PER_ROOM));
++}
++
++/** Tell a sender their action reached the other person: now if they're connected, else on their next hello. */
++function sendReceipt(deviceId, msg) {
++  if (!deviceId) return;
++  if (notifyDevice(deviceId, msg) > 0) return;
++  const list = pendingReceipts.get(deviceId) || [];
++  list.push(msg);
++  pendingReceipts.set(deviceId, list.slice(-50));
++}
++
++function flushReceipts(deviceId, ws) {
++  const list = deviceId && pendingReceipts.get(deviceId);
++  if (!list || !list.length) return;
++  pendingReceipts.delete(deviceId);
++  for (const msg of list) send(ws, msg);
++}
++
++/**
++ * Someone just attached: replay what the other person sent while they were away (the newest few, each
++ * marked `queued` with its original time; `missed` is the full count) and receipt every one of them.
++ * Older apps ignore the extra fields and simply play the visits.
++ */
++function flushPendingActions(room, ws, deviceId) {
++  const list = pendingActions.get(room.code);
++  if (!list || !list.length) return;
++  const now = Date.now();
++  const fresh = list.filter((e) => now - e.at < PENDING_TTL_MS);
++  const forMe = fresh.filter((e) => !deviceId || e.senderDeviceId !== deviceId);
++  const stillWaiting = fresh.filter((e) => deviceId && e.senderDeviceId === deviceId);
++  if (stillWaiting.length) pendingActions.set(room.code, stillWaiting);
++  else pendingActions.delete(room.code);
++  if (!forMe.length) return;
++  for (const e of forMe.slice(-MAX_REPLAY_ON_ATTACH)) {
++    const st = memberStats(room, e.from);
++    send(ws, {
++      type: "sync",
++      code: room.code,
++      fullness: st?.fullness ?? 80,
++      happiness: st?.happiness ?? 80,
++      updatedAt: e.at,
++      action: e.action,
++      from: e.from,
++      species: e.species,
++      outfit: e.outfit || "",
++      dnd: false,
++      queued: true,
++      at: e.at,
++      missed: forMe.length,
++    });
++  }
++  for (const e of forMe) {
++    if (e.id) sendReceipt(e.senderDeviceId, { type: "ack", code: room.code, id: e.id, status: "delivered", at: now });
++  }
++}
++
+ function send(ws, msg) {
+   if (ws.readyState === 1) ws.send(JSON.stringify(msg));
+ }
+@@ -1405,6 +1478,7 @@ wss.on("connection", (ws) => {
+       send(ws, { type: "hello_ok", deviceId: ws.deviceId });
+       // Deliver any claims that happened while this pad was offline.
+       flushPendingBonds(ws.deviceId, ws);
++      flushReceipts(ws.deviceId, ws);
+       return;
+     }
+ 
+@@ -1486,6 +1560,8 @@ wss.on("connection", (ws) => {
+         friendCount: room.members.size,
+       });
+       notifyRoom(room);
++      flushPendingActions(room, ws, deviceId);
++      flushReceipts(deviceId, ws);
+       return;
+     }
+ 
+@@ -1663,6 +1739,16 @@ wss.on("connection", (ws) => {
+           species: msg.species || (fromName && room.species.get(fromName)) || null,
+           payload: { fullness: mine?.fullness, happiness: mine?.happiness },
+         });
++        // Nobody else here: hold it until they attach. Apps that send an `id` hear back either way.
++        const id = msg.id ? String(msg.id).slice(0, 40) : null;
++        const othersHere = [...room.members.keys()].some((p) => p !== ws);
++        if (!othersHere) {
++          queueAction(room.code, {
++            id, action, from: fromName, species: payload.species, outfit: payload.outfit,
++            at: Date.now(), senderDeviceId: ws.deviceId || null,
++          });
++        }
++        if (id) send(ws, { type: "ack", code: room.code, id, status: othersHere ? "live" : "queued", at: Date.now() });
+       }
+       broadcast(room, payload, ws);
+       return;

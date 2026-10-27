@@ -1,0 +1,13 @@
+{
+  "pages": ["pages/pick/pick", "pages/room/room"],
+  "window": {
+    "navigationBarTitleText": "Boop 小宠物",
+    "navigationBarBackgroundColor": "#FFF6E6",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF6E6",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
